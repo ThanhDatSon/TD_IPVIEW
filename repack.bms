@@ -1,0 +1,125 @@
+comtype zstd
+
+# File 1: 00035398.dat
+set NAME1 "file_35000/00035398.dat"
+set OFFSET1 0x114601ff
+set SIZE1 0x13241
+
+# Xử lý file 00035398.dat
+goto OFFSET1
+idstring "\x28\xb5\x2f\xfd"
+savepos b1
+getbits Dictionary_ID_flag 2
+savepos b1
+getbits Content_Checksum_flag 1
+savepos b1
+getbits Reserved_bit 1
+savepos b1
+getbits Unused_bit 1
+savepos b1
+getbits Single_Segment_flag 1
+savepos b1
+getbits Frame_Content_Size_flag 2
+savepos b1
+
+if Single_Segment_flag == 0
+    get Window_Descriptor byte
+    savepos b1
+endif
+
+if Frame_Content_Size_flag == 0
+    if Single_Segment_flag == 0
+        math Frame_Content_Size = 0
+    else
+        get Frame_Content_Size byte
+    endif
+elif Frame_Content_Size_flag == 1
+    get Frame_Content_Size short
+    math Frame_Content_Size + 256
+elif Frame_Content_Size_flag == 2
+    get Frame_Content_Size long
+elif Frame_Content_Size_flag == 3
+    get Frame_Content_Size longlong
+endif
+
+do
+    getbits Last_Block 1
+    getbits Block_Type 2
+    getbits Block_Size 21
+    if Block_Type == 1
+        goto 1 0 SEEK_CUR
+    else
+        goto Block_Size 0 SEEK_CUR
+    endif
+    if Content_Checksum_flag != 0
+        get Content_Checksum long
+    endif
+while Last_Block == 0
+
+savepos ENDPOS1
+math SIZE1 = ENDPOS1
+math SIZE1 - OFFSET1
+
+clog NAME1 OFFSET1 SIZE1 Frame_Content_Size
+
+# File 2: 00035399.dat
+set NAME2 "file_35000/00035399.dat"
+set OFFSET2 0x114635bf
+set SIZE2 0x7192
+
+# Xử lý file 00035399.dat
+goto OFFSET2
+idstring "\x28\xb5\x2f\xfd"
+savepos b1
+getbits Dictionary_ID_flag 2
+savepos b1
+getbits Content_Checksum_flag 1
+savepos b1
+getbits Reserved_bit 1
+savepos b1
+getbits Unused_bit 1
+savepos b1
+getbits Single_Segment_flag 1
+savepos b1
+getbits Frame_Content_Size_flag 2
+savepos b1
+
+if Single_Segment_flag == 0
+    get Window_Descriptor byte
+    savepos b1
+endif
+
+if Frame_Content_Size_flag == 0
+    if Single_Segment_flag == 0
+        math Frame_Content_Size = 0
+    else
+        get Frame_Content_Size byte
+    endif
+elif Frame_Content_Size_flag == 1
+    get Frame_Content_Size short
+    math Frame_Content_Size + 256
+elif Frame_Content_Size_flag == 2
+    get Frame_Content_Size long
+elif Frame_Content_Size_flag == 3
+    get Frame_Content_Size longlong
+endif
+
+do
+    getbits Last_Block 1
+    getbits Block_Type 2
+    getbits Block_Size 21
+    if Block_Type == 1
+        goto 1 0 SEEK_CUR
+    else
+        goto Block_Size 0 SEEK_CUR
+    endif
+    if Content_Checksum_flag != 0
+        get Content_Checksum long
+    endif
+while Last_Block == 0
+
+savepos ENDPOS2
+math SIZE2 = ENDPOS2
+math SIZE2 - OFFSET2
+
+clog NAME2 OFFSET2 SIZE2 Frame_Content_Size
